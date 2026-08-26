@@ -113,7 +113,7 @@ class _LineSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      initialValue: value,
+      value: value,
       decoration: const InputDecoration(
         labelText: 'Service',
         prefixIcon: Icon(Icons.train_outlined),
@@ -280,7 +280,7 @@ class _DayCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                   decoration: BoxDecoration(
-                    color: colour.withValues(alpha: 0.12),
+                    color: colour.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

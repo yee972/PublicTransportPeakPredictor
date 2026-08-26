@@ -14,7 +14,7 @@ class BandBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: colour.withValues(alpha: 0.14),
+        color: colour.withOpacity(0.14),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -36,7 +36,7 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: colour.withValues(alpha: 0.14),
+        color: colour.withOpacity(0.14),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

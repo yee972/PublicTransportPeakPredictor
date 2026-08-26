@@ -88,7 +88,7 @@ class BarChart extends StatelessWidget {
                       height: height * fraction,
                       decoration: BoxDecoration(
                         color: entry.outlined
-                            ? entry.colour.withValues(alpha: 0.12)
+                            ? entry.colour.withOpacity(0.12)
                             : entry.colour,
                         border: entry.outlined
                             ? Border.all(color: entry.colour, width: 1.2)

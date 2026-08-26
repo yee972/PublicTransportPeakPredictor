@@ -110,7 +110,7 @@ class RouteResultsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<JourneyPreference>(
-                      initialValue: preference,
+                      value: preference,
                       decoration: const InputDecoration(labelText: 'Preference'),
                       items: JourneyPreference.values
                           .map((item) => DropdownMenuItem(

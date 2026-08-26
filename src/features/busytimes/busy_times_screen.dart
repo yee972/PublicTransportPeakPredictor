@@ -272,7 +272,7 @@ class _MapCard extends StatelessWidget {
                     onTap: () => provider.selectStation(load.station.id),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: colour.withValues(alpha: 0.85),
+                        color: colour.withOpacity(0.85),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: selected ? Colors.black87 : Colors.white,
