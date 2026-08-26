@@ -59,7 +59,7 @@ class ValidationScreen extends StatelessWidget {
                                   '${provider.networkMape.toStringAsFixed(1)}%',
                             ),
                           ),
-                          Expanded(
+                          const Expanded(
                             child: _Stat(
                               label: 'Hold-out window',
                               value: '${AppConfig.validationHoldOutDays} days',

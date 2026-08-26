@@ -94,6 +94,8 @@ class NotificationService {
         _nextInstanceOf(hour, minute),
         _details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (_) {
@@ -117,6 +119,8 @@ class NotificationService {
         tz.TZDateTime.from(departAt, tz.local),
         _details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (_) {
       return;

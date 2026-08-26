@@ -121,7 +121,7 @@ class _StationTile extends StatelessWidget {
         ),
       ),
       trailing: station.isInterchange
-          ? Icon(Icons.swap_horiz, size: 18, color: AppTheme.textSecondary)
+          ? const Icon(Icons.swap_horiz, size: 18, color: AppTheme.textSecondary)
           : null,
     );
   }

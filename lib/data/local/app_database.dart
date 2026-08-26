@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
@@ -13,6 +14,8 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._();
 
   AppDatabase._();
+
+  static bool get isSupported => !kIsWeb;
 
   Database? _database;
 
@@ -71,6 +74,7 @@ class AppDatabase {
   }
 
   Future<void> replaceAll(String table, List<Map<String, dynamic>> rows) async {
+    if (!isSupported) return;
     final db = await database;
     await db.transaction((txn) async {
       await txn.delete(table);
@@ -88,6 +92,7 @@ class AppDatabase {
   }
 
   Future<DateTime?> lastSyncedAt(String table) async {
+    if (!isSupported) return null;
     final db = await database;
     final rows = await db.query(
       'cache_metadata',
@@ -100,54 +105,63 @@ class AppDatabase {
   }
 
   Future<List<RailLine>> readLines() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('rail_lines', orderBy: 'sort_order ASC');
     return rows.map(RailLine.fromJson).toList();
   }
 
   Future<List<Station>> readStations() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('stations', orderBy: 'name ASC');
     return rows.map(Station.fromJson).toList();
   }
 
   Future<List<RailEdge>> readEdges() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('rail_edges');
     return rows.map(RailEdge.fromJson).toList();
   }
 
   Future<List<StationLink>> readLinks() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('station_links');
     return rows.map(StationLink.fromJson).toList();
   }
 
   Future<List<RidershipDay>> readRidership() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('ridership_daily', orderBy: 'service_date ASC');
     return rows.map(RidershipDay.fromJson).toList();
   }
 
   Future<List<PublicHoliday>> readHolidays() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('public_holidays');
     return rows.map(PublicHoliday.fromJson).toList();
   }
 
   Future<List<ScheduleSlot>> readSchedule() async {
+    if (!isSupported) return const [];
     final db = await database;
     final rows = await db.query('schedule_frequency');
     return rows.map(ScheduleSlot.fromJson).toList();
   }
 
   Future<bool> get hasNetworkCache async {
+    if (!isSupported) return false;
     final db = await database;
     final result = await db.rawQuery('SELECT COUNT(*) AS total FROM stations');
     return (Sqflite.firstIntValue(result) ?? 0) > 0;
   }
 
   Future<void> clear() async {
+    if (!isSupported) return;
     final db = await database;
     for (final table in const [
       'rail_lines',

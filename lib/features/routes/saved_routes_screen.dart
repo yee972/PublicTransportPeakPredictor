@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/app_theme.dart';
+import '../../models/journey.dart';
 import '../../models/user_profile.dart';
 import '../../widgets/band_badge.dart';
 import '../../widgets/state_views.dart';
