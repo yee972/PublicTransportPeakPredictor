@@ -9,12 +9,6 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-analyzer:
-  exclude:
-    # Duplicate of lib/ carried over from the upstream repo layout.
-    # Flutter only compiles lib/; src/ is dead weight and doubles every error.
-    - src/**
-
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
