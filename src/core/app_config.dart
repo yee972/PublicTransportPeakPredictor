@@ -1,13 +1,7 @@
 class AppConfig {
-  static const String supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'PASTE_YOUR_SUPABASE_URL_HERE',
-  );
+  static const String supabaseUrl = 'https://brgarafuyxkvfyqnwnrc.supabase.co';
 
-  static const String supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE',
-  );
+  static const String supabaseAnonKey = 'sb_publishable_b5bNVvyVJyRBAYgS1N6vdw_sF7v7vOO';
 
   static const String openDataPortal = 'https://data.gov.my/';
   static const String ridershipDatasetUrl =
