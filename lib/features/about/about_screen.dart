@@ -69,10 +69,10 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          SectionCard(
+          const SectionCard(
             title: 'Honest limits',
             icon: Icons.balance_outlined,
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Limit(
