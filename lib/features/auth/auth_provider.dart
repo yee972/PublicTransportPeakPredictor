@@ -41,10 +41,19 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _handleAuthChange(AuthState state) {
-    final signedIn = state.session != null;
+    if (state.event == AuthChangeEvent.signedOut) {
+      _status = AuthStatus.signedOut;
+      _profile = null;
+      notifyListeners();
+      return;
+    }
+
+    final signedIn = _client.auth.currentSession != null;
     _status = signedIn ? AuthStatus.signedIn : AuthStatus.signedOut;
     if (signedIn) {
-      _loadProfile();
+      if (_profile == null) {
+        _loadProfile();
+      }
     } else {
       _profile = null;
     }

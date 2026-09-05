@@ -44,10 +44,7 @@ class NetworkRepository {
     if (!forceRefresh && _scheduleCache != null) return _scheduleCache!;
     try {
       final slots = await _api.fetchSchedule();
-      await _database.replaceAll(
-        'schedule_frequency',
-        slots.map((slot) => slot.toJson()).toList(),
-      );
+      await _cacheSchedule(slots);
       _scheduleCache = slots;
       return slots;
     } on DataFailure {
@@ -68,23 +65,38 @@ class NetworkRepository {
     await _database.clear();
   }
 
+  Future<void> _cacheSchedule(List<ScheduleSlot> slots) async {
+    try {
+      await _database.replaceAll(
+        'schedule_frequency',
+        slots.map((slot) => slot.toJson()).toList(),
+      );
+    } catch (_) {
+      return;
+    }
+  }
+
   Future<void> _writeCache(RailNetwork network) async {
-    await _database.replaceAll(
-      'rail_lines',
-      network.lines.map((line) => line.toJson()).toList(),
-    );
-    await _database.replaceAll(
-      'stations',
-      network.stations.map((station) => station.toJson()).toList(),
-    );
-    await _database.replaceAll(
-      'rail_edges',
-      network.edges.map((edge) => edge.toJson()).toList(),
-    );
-    await _database.replaceAll(
-      'station_links',
-      network.links.map((link) => link.toJson()).toList(),
-    );
+    try {
+      await _database.replaceAll(
+        'rail_lines',
+        network.lines.map((line) => line.toJson()).toList(),
+      );
+      await _database.replaceAll(
+        'stations',
+        network.stations.map((station) => station.toJson()).toList(),
+      );
+      await _database.replaceAll(
+        'rail_edges',
+        network.edges.map((edge) => edge.toJson()).toList(),
+      );
+      await _database.replaceAll(
+        'station_links',
+        network.links.map((link) => link.toJson()).toList(),
+      );
+    } catch (_) {
+      return;
+    }
   }
 
   Future<RailNetwork?> _readCache() async {

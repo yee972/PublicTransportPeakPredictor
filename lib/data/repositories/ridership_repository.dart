@@ -34,14 +34,7 @@ class RidershipRepository {
       final ridership = await _api.fetchRidership();
       final holidays = await _api.fetchHolidays();
 
-      await _database.replaceAll(
-        'ridership_daily',
-        ridership.map((day) => day.toJson()).toList(),
-      );
-      await _database.replaceAll(
-        'public_holidays',
-        holidays.map((holiday) => holiday.toJson()).toList(),
-      );
+      await _cache(ridership, holidays);
 
       final snapshot = RidershipSnapshot(
         ridership: ridership,
@@ -62,6 +55,24 @@ class RidershipRepository {
       );
       _memoryCache = snapshot;
       return snapshot;
+    }
+  }
+
+  Future<void> _cache(
+    List<RidershipDay> ridership,
+    List<PublicHoliday> holidays,
+  ) async {
+    try {
+      await _database.replaceAll(
+        'ridership_daily',
+        ridership.map((day) => day.toJson()).toList(),
+      );
+      await _database.replaceAll(
+        'public_holidays',
+        holidays.map((holiday) => holiday.toJson()).toList(),
+      );
+    } catch (_) {
+      return;
     }
   }
 
