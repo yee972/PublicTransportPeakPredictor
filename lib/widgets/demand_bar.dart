@@ -78,14 +78,16 @@ class BarChart extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: entries.map((entry) {
-              final fraction = (entry.value / safePeak).clamp(0.05, 1.0);
+              final fraction = entry.value <= 0
+                  ? 0.0
+                  : (entry.value / safePeak).clamp(0.05, 1.0);
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 1.2),
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      height: height * fraction,
+                      height: fraction <= 0 ? 0 : height * fraction,
                       decoration: BoxDecoration(
                         color: entry.outlined
                             ? entry.colour.withValues(alpha: 0.12)
