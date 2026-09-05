@@ -121,5 +121,5 @@ class Journey {
   String get destinationStationId => legs.last.alightStationId;
 
   String signature() =>
-      legs.map((leg) => '${leg.lineId}:${leg.boardStationId}>${leg.alightStationId}').join('|');
+      legs.map((leg) => leg.stationIds.join('>')).join('|');
 }

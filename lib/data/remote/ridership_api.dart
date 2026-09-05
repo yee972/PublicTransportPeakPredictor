@@ -8,14 +8,15 @@ class RidershipApi {
 
   RidershipApi(this._client);
 
+  static const int _linesPerDay = 8;
+
   Future<List<RidershipDay>> fetchRidership({int days = 400}) async {
     try {
-      final cutoff = DateTime.now().subtract(Duration(days: days));
       final rows = await _client
           .from('ridership_daily')
           .select()
-          .gte('service_date', cutoff.toIso8601String().substring(0, 10))
-          .order('service_date');
+          .order('service_date', ascending: false)
+          .limit(days * _linesPerDay);
       return rows.map<RidershipDay>((row) => RidershipDay.fromJson(row)).toList();
     } on PostgrestException catch (error) {
       throw DataFailure('Could not load ridership: ${error.message}');
