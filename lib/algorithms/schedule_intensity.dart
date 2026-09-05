@@ -134,16 +134,24 @@ class ScheduleIntensity {
     return profile.take(count).map((slot) => slot.hour).toList()..sort();
   }
 
+  int dailyTrips(String lineId, String dayType) {
+    var total = 0;
+    for (var hour = 0; hour < 24; hour++) {
+      total += lineTrips(lineId, dayType, hour);
+    }
+    return total;
+  }
+
   double crowdIndex({
     required String lineId,
     required String stationId,
     required String dayType,
     required int hour,
-    required double dailyRelative,
+    required double lineLoad,
   }) {
     final hourly = lineIntensity(lineId, dayType, hour);
     final interchangeLoad = stationIntensity(stationId, dayType, hour);
-    return (hourly * 0.7 + interchangeLoad * 0.3) * dailyRelative;
+    return hourly * (lineLoad * 0.75 + interchangeLoad * 0.25);
   }
 
   static String dayTypeFor(DateTime date) => ScheduleSlot.dayTypeFor(date);

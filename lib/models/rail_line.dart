@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class RailLine {
   final String id;
   final String code;
@@ -25,12 +23,6 @@ class RailLine {
 
   bool get sharesSeries => seriesId != id;
 
-  Color get displayColour {
-    final hex = colour.replaceFirst('#', '');
-    final value = int.tryParse(hex, radix: 16);
-    if (value == null) return const Color(0xFF6B7280);
-    return Color(0xFF000000 | value);
-  }
 
   factory RailLine.fromJson(Map<String, dynamic> json) {
     return RailLine(

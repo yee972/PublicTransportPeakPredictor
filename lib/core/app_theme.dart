@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-enum DemandBand { quiet, baseline, moderate, busy, unknown }
+import '../models/demand_band.dart';
+import '../models/rail_line.dart';
 
 class DemandPalette {
   static const Color quiet = Color(0xFF6BBF8A);
@@ -184,5 +185,14 @@ class AppTheme {
     FontWeight weight = FontWeight.w500,
   }) {
     return GoogleFonts.robotoMono(fontSize: size, color: color, fontWeight: weight);
+  }
+}
+
+extension RailLineColour on RailLine {
+  Color get displayColour {
+    final hex = colour.replaceFirst('#', '');
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return const Color(0xFF6B7280);
+    return Color(0xFF000000 | value);
   }
 }

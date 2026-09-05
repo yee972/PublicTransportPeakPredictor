@@ -1,4 +1,4 @@
-import '../core/app_theme.dart';
+import '../models/demand_band.dart';
 
 class DemandForecast {
   final DateTime date;

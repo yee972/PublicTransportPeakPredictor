@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../algorithms/demand_model.dart';
 import '../../algorithms/schedule_intensity.dart';
 import '../../core/app_config.dart';
-import '../../core/app_theme.dart';
+import '../../models/demand_band.dart';
 import '../../data/repositories/network_repository.dart';
 import '../../data/repositories/ridership_repository.dart';
 import '../../models/demand_forecast.dart';
@@ -26,6 +26,7 @@ class ForecastProvider extends ChangeNotifier {
   ScheduleIntensity? _intensity;
   final Map<String, DemandModel> _models = {};
   final Map<String, ValidationMetrics> _validation = {};
+  final Map<String, Map<String, double>> _lineLoadCache = {};
 
   ForecastProvider(this._networkRepository, this._ridershipRepository);
 
@@ -82,6 +83,7 @@ class ForecastProvider extends ChangeNotifier {
   ) {
     _models.clear();
     _validation.clear();
+    _lineLoadCache.clear();
     for (final line in lines) {
       final model = DemandModel(
         lineId: line.seriesId,
@@ -164,10 +166,13 @@ class ForecastProvider extends ChangeNotifier {
   }
 
   DemandForecast _blendAcrossLines(DateTime date) {
-    final forecasts = _network.lines
-        .map((line) => forecastFor(line.id, date))
-        .where((forecast) => forecast.hasEnoughHistory)
-        .toList();
+    final seenSeries = <String>{};
+    final forecasts = <DemandForecast>[];
+    for (final line in _network.lines) {
+      if (!seenSeries.add(line.seriesId)) continue;
+      final forecast = forecastFor(line.id, date);
+      if (forecast.hasEnoughHistory) forecasts.add(forecast);
+    }
 
     if (forecasts.isEmpty) return DemandForecast.insufficient(date, 'network');
 
@@ -195,17 +200,41 @@ class ForecastProvider extends ChangeNotifier {
       percentOfMax: percentSum / forecasts.length,
       deviationFromBaseline: baseline <= 0 ? 0 : predicted / baseline - 1,
       relativeToTypical: relative,
-      band: bandForRelative(relative),
+      band: DemandBands.fromRelative(relative),
       hasEnoughHistory: true,
       holidayName: holidayName,
     );
   }
 
-  static DemandBand bandForRelative(double relative) {
-    if (relative < 0.80) return DemandBand.quiet;
-    if (relative < 1.02) return DemandBand.baseline;
-    if (relative < 1.12) return DemandBand.moderate;
-    return DemandBand.busy;
+  Map<String, double> lineLoadsFor(DateTime date) {
+    final key = '${date.year}-${date.month}-${date.day}';
+    final cached = _lineLoadCache[key];
+    if (cached != null) return cached;
+
+    final resolver = _intensity;
+    final loads = <String, double>{};
+    if (resolver == null) return loads;
+
+    final dayType = ScheduleSlot.dayTypeFor(date);
+    final ridersPerTrain = <String, double>{};
+    var heaviest = 0.0;
+    for (final line in _network.lines) {
+      final trips = resolver.dailyTrips(line.id, dayType);
+      final forecast = forecastFor(line.id, date);
+      if (trips <= 0 || !forecast.hasEnoughHistory) {
+        ridersPerTrain[line.id] = 0;
+        continue;
+      }
+      final value = forecast.predictedRiders / trips;
+      ridersPerTrain[line.id] = value;
+      if (value > heaviest) heaviest = value;
+    }
+
+    ridersPerTrain.forEach((lineId, value) {
+      loads[lineId] = heaviest <= 0 ? 0 : value / heaviest;
+    });
+    _lineLoadCache[key] = loads;
+    return loads;
   }
 
   double crowdIndexFor({
@@ -216,14 +245,12 @@ class ForecastProvider extends ChangeNotifier {
   }) {
     final resolver = _intensity;
     if (resolver == null) return 0;
-    final forecast = forecastFor(lineId, date);
-    final relative = forecast.hasEnoughHistory ? forecast.relativeToTypical : 1.0;
     return resolver.crowdIndex(
       lineId: lineId,
       stationId: stationId,
       dayType: ScheduleSlot.dayTypeFor(date),
       hour: hour,
-      dailyRelative: relative,
+      lineLoad: lineLoadsFor(date)[lineId] ?? 0,
     );
   }
 }

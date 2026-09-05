@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
+import '../models/demand_band.dart';
 
 class BandBadge extends StatelessWidget {
   final DemandBand band;

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../algorithms/outlook_synthesis.dart';
 import '../../core/app_theme.dart';
+import '../../models/demand_band.dart';
 import '../../models/demand_forecast.dart';
 import '../../models/rail_line.dart';
 import '../../widgets/band_badge.dart';
@@ -216,7 +217,7 @@ class _TrendCard extends StatelessWidget {
       ...actuals.map((point) => BarChartEntry(
             value: point.riders.toDouble(),
             colour: DemandPalette.of(
-              ForecastProvider.bandForRelative(
+              DemandBands.fromRelative(
                 busiest.today.baselineRiders <= 0
                     ? 1
                     : point.riders / busiest.today.baselineRiders,

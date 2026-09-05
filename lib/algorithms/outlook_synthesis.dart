@@ -1,4 +1,4 @@
-import '../core/app_theme.dart';
+import '../models/demand_band.dart';
 import '../models/demand_forecast.dart';
 import '../models/rail_line.dart';
 
@@ -49,11 +49,7 @@ class OutlookSynthesis {
     final total = scored
         .map((outlook) => outlook.today.relativeToTypical)
         .reduce((a, b) => a + b);
-    final average = total / scored.length;
-    if (average < 0.80) return DemandBand.quiet;
-    if (average < 1.02) return DemandBand.baseline;
-    if (average < 1.12) return DemandBand.moderate;
-    return DemandBand.busy;
+    return DemandBands.fromRelative(total / scored.length);
   }
 
   static String _headline(DemandBand band) {

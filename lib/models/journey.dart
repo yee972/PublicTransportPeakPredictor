@@ -39,9 +39,9 @@ extension JourneyPreferenceLabel on JourneyPreference {
       case JourneyPreference.fastest:
         return 0;
       case JourneyPreference.balanced:
-        return 240;
+        return 0.35;
       case JourneyPreference.leastCrowded:
-        return 900;
+        return 0.9;
     }
   }
 
