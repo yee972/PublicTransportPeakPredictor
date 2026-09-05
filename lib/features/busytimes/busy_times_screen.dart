@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/app_config.dart';
 import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
+import '../../widgets/band_badge.dart';
 import '../../widgets/demand_bar.dart';
 import '../../widgets/section_card.dart';
 import '../../widgets/state_views.dart';
@@ -91,10 +92,10 @@ class _BusyTimesScreenState extends State<BusyTimesScreen> {
                   : () => provider.useCurrentLocation(),
               icon: provider.locating
                   ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
                   : const Icon(Icons.my_location, size: 17),
               label: const Text('Near me'),
             ),
@@ -103,7 +104,7 @@ class _BusyTimesScreenState extends State<BusyTimesScreen> {
         const SizedBox(height: 4),
         Text(
           'Station % = scheduled trains at this hour, relative to the busiest '
-          'station-hour on the network.',
+              'station-hour on the network.',
           style: AppTheme.mono(size: 11, color: AppTheme.textSecondary),
         ),
         const SizedBox(height: 12),
@@ -146,8 +147,8 @@ class _BusyTimesScreenState extends State<BusyTimesScreen> {
                               const SizedBox(height: 3),
                               Text(
                                 '${load.trips} trains scheduled · '
-                                '${load.station.lineIds.length} line'
-                                '${load.station.lineIds.length == 1 ? '' : 's'}',
+                                    '${load.station.lineIds.length} line'
+                                    '${load.station.lineIds.length == 1 ? '' : 's'}',
                                 style: AppTheme.mono(
                                   size: 11,
                                   color: AppTheme.textSecondary,
@@ -261,7 +262,7 @@ class _MapCard extends StatelessWidget {
             MarkerLayer(
               markers: loads.map((load) {
                 final colour =
-                    intensityColour(load.intensity);
+                intensityColour(load.intensity);
                 final selected = load.station.id == provider.selectedStationId;
                 final size = 10.0 + load.intensity * 12.0;
                 return Marker(
@@ -269,7 +270,10 @@ class _MapCard extends StatelessWidget {
                   width: size + 8,
                   height: size + 8,
                   child: GestureDetector(
-                    onTap: () => provider.selectStation(load.station.id),
+                    onTap: () {
+                      provider.selectStation(load.station.id);
+                      _showStationSheet(context, provider, load);
+                    },
                     child: Container(
                       decoration: BoxDecoration(
                         color: colour.withValues(alpha: 0.85),
@@ -286,6 +290,87 @@ class _MapCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+Future<void> _showStationSheet(
+    BuildContext context,
+    BusyTimesProvider provider,
+    StationLoad load,
+    ) async {
+  final colour = intensityColour(load.intensity);
+  final percent = (load.intensity * 100).round();
+
+  final viewDetails = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              load.station.name,
+              style: Theme.of(sheetContext).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: load.station.lineIds.map((lineId) {
+                final line = provider.network.line(lineId);
+                if (line == null) return const SizedBox.shrink();
+                return StatusPill(
+                  label: line.shortName.toUpperCase(),
+                  colour: line.displayColour,
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: DemandBar(value: load.intensity, colour: colour),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$percent%',
+                  style: AppTheme.mono(
+                    size: 16,
+                    weight: FontWeight.w700,
+                    color: colour,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${load.trips} trains scheduled at this hour · '
+                  '${load.station.lineIds.length} line'
+                  '${load.station.lineIds.length == 1 ? '' : 's'}',
+              style: AppTheme.mono(size: 12, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(sheetContext, true),
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: const Text('View station details'),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  if (viewDetails == true && context.mounted) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StationDetailScreen(stationId: load.station.id),
       ),
     );
   }
