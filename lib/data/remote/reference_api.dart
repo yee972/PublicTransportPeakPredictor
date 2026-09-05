@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_config.dart';
+
 import '../../models/rail_edge.dart';
 import '../../models/rail_line.dart';
 import '../../models/ridership_day.dart';
@@ -86,7 +88,7 @@ class ReferenceApi {
 
   static Future<T> _guard<T>(String label, Future<T> Function() action) async {
     try {
-      return await action();
+      return await action().timeout(AppConfig.requestTimeout);
     } on PostgrestException catch (error) {
       throw DataFailure('Could not load $label: ${error.message}');
     } catch (_) {

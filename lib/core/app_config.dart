@@ -10,6 +10,8 @@ class AppConfig {
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   static const String tileUserAgent = 'com.group3.peak_predictor';
 
+  static const Duration requestTimeout = Duration(seconds: 6);
+
   static const int forecastHorizonDays = 7;
   static const int trendWindowDays = 14;
   static const int baselineWeeks = 8;

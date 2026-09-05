@@ -57,9 +57,14 @@ class ForecastProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final network = await _networkRepository.loadNetwork(forceRefresh: forceRefresh);
-      final schedule = await _networkRepository.loadSchedule(forceRefresh: forceRefresh);
-      final snapshot = await _ridershipRepository.load(forceRefresh: forceRefresh);
+      final results = await Future.wait([
+        _networkRepository.loadNetwork(forceRefresh: forceRefresh),
+        _networkRepository.loadSchedule(forceRefresh: forceRefresh),
+        _ridershipRepository.load(forceRefresh: forceRefresh),
+      ]);
+      final network = results[0] as RailNetwork;
+      final schedule = results[1] as List<ScheduleSlot>;
+      final snapshot = results[2] as RidershipSnapshot;
 
       _network = network;
       _intensity = ScheduleIntensity(slots: schedule, stations: network.stations);

@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_config.dart';
+
 import '../../models/ridership_day.dart';
 import 'reference_api.dart';
 
@@ -16,7 +18,8 @@ class RidershipApi {
           .from('ridership_daily')
           .select()
           .order('service_date', ascending: false)
-          .limit(days * _linesPerDay);
+          .limit(days * _linesPerDay)
+          .timeout(AppConfig.requestTimeout);
       return rows.map<RidershipDay>((row) => RidershipDay.fromJson(row)).toList();
     } on PostgrestException catch (error) {
       throw DataFailure('Could not load ridership: ${error.message}');
@@ -27,7 +30,11 @@ class RidershipApi {
 
   Future<List<PublicHoliday>> fetchHolidays() async {
     try {
-      final rows = await _client.from('public_holidays').select().order('holiday_date');
+      final rows = await _client
+          .from('public_holidays')
+          .select()
+          .order('holiday_date')
+          .timeout(AppConfig.requestTimeout);
       return rows.map<PublicHoliday>((row) => PublicHoliday.fromJson(row)).toList();
     } on PostgrestException catch (error) {
       throw DataFailure('Could not load holidays: ${error.message}');

@@ -151,7 +151,7 @@ class AboutScreen extends StatelessWidget {
                       ? 'Not yet validated'
                       : 'Busy/quiet correct on '
                           '${provider.networkAccuracy.toStringAsFixed(1)}% of '
-                          'hold-out days across ${provider.allValidation.length} lines',
+                          'hold-out days across ${provider.distinctSeriesValidation.length} lines',
                   style: AppTheme.mono(size: 12),
                 ),
                 const SizedBox(height: 10),
