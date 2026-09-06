@@ -277,18 +277,22 @@ class _DayCard extends StatelessWidget {
                 ),
               ),
               if (forecast.hasEnoughHistory) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: colour.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${(forecast.percentOfMax * 100).round()}% Max',
-                    style: AppTheme.mono(
-                      size: 11,
-                      color: colour,
-                      weight: FontWeight.w700,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: colour.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${(forecast.percentOfMax * 100).round()}% Max',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.mono(
+                        size: 11,
+                        color: colour,
+                        weight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

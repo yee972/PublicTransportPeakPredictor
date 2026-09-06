@@ -99,8 +99,9 @@ class RouteDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'cost = travel time + interchange penalty + '
-                  '${journey.preference.crowdWeight.round()} × crowd index',
+                  'cost = travel time × (1 + '
+                  '${journey.preference.crowdWeight} × crowd index) '
+                  '+ interchange penalty',
                   style: AppTheme.mono(size: 11.5),
                 ),
                 const SizedBox(height: 10),

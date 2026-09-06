@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import '../core/app_config.dart';
-import '../core/app_theme.dart';
+import '../models/demand_band.dart';
 import '../models/demand_forecast.dart';
 import '../models/ridership_day.dart';
 
@@ -171,7 +171,7 @@ class DemandModel {
       percentOfMax: _maximumRiders <= 0 ? 0 : predicted / _maximumRiders,
       deviationFromBaseline: baseline <= 0 ? 0 : predicted / baseline - 1,
       relativeToTypical: relative,
-      band: _bandFor(relative),
+      band: DemandBands.fromRelative(relative),
       hasEnoughHistory: true,
       holidayName: holidayName,
     );
@@ -235,13 +235,6 @@ class DemandModel {
         ? visible
         : visible.sublist(visible.length - 90);
     return _median(window.map((o) => o.riders).toList());
-  }
-
-  static DemandBand _bandFor(double relativeToTypical) {
-    if (relativeToTypical < 0.80) return DemandBand.quiet;
-    if (relativeToTypical < 1.02) return DemandBand.baseline;
-    if (relativeToTypical < 1.12) return DemandBand.moderate;
-    return DemandBand.busy;
   }
 
   static double _median(List<int> values) {

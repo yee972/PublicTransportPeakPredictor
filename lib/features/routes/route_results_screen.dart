@@ -62,10 +62,15 @@ class RouteResultsScreen extends StatelessWidget {
                       child: _JourneyCard(journey: journey, network: network),
                     )),
                 const SizedBox(height: 4),
-                const InfoNote(
-                  message: 'All options come from one Dijkstra search. Only the '
-                      'weight on predicted crowding changes: zero for Fastest, '
-                      'highest for Least crowded.',
+                InfoNote(
+                  message: journeys.length == 1
+                      ? 'Only one route is shown because the quickest way here is '
+                          'also the calmest. Searching again with more weight on '
+                          'crowding returns the same journey, so there is no '
+                          'trade-off worth offering.'
+                      : 'All options come from one Dijkstra search. Only the '
+                          'weight on predicted crowding changes: zero for Fastest, '
+                          'highest for Least crowded.',
                 ),
               ],
             ),

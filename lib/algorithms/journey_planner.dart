@@ -167,7 +167,8 @@ class JourneyPlanner {
         if (settled[arc.target]) continue;
         var penalty = 0.0;
         if (arc.kind == _ArcKind.ride && weight > 0) {
-          penalty = weight *
+          penalty = arc.seconds *
+              weight *
               crowdIndex(
                 lineId: _nodeLine[arc.target],
                 stationId: _nodeStation[arc.target],
@@ -264,16 +265,20 @@ class JourneyPlanner {
     }
     closeLeg();
 
-    final allCrowd = legs.map((leg) => leg.averageCrowdIndex).toList();
+    var weightedCrowd = 0.0;
+    var weightedSeconds = 0;
+    for (final leg in legs) {
+      weightedCrowd += leg.averageCrowdIndex * leg.travelSeconds;
+      weightedSeconds += leg.travelSeconds;
+    }
+
     return Journey(
       preference: preference,
       legs: legs,
       transfers: transfers,
       travelSeconds: travelSeconds,
       transferSeconds: transferSeconds,
-      crowdIndex: allCrowd.isEmpty
-          ? 0
-          : allCrowd.reduce((a, b) => a + b) / allCrowd.length,
+      crowdIndex: weightedSeconds <= 0 ? 0 : weightedCrowd / weightedSeconds,
       departureTime: departureTime,
     );
   }

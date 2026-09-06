@@ -39,9 +39,9 @@ extension JourneyPreferenceLabel on JourneyPreference {
       case JourneyPreference.fastest:
         return 0;
       case JourneyPreference.balanced:
-        return 240;
+        return 0.35;
       case JourneyPreference.leastCrowded:
-        return 900;
+        return 0.9;
     }
   }
 
@@ -121,5 +121,5 @@ class Journey {
   String get destinationStationId => legs.last.alightStationId;
 
   String signature() =>
-      legs.map((leg) => '${leg.lineId}:${leg.boardStationId}>${leg.alightStationId}').join('|');
+      legs.map((leg) => leg.stationIds.join('>')).join('|');
 }
