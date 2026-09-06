@@ -34,9 +34,21 @@ class HomeScreen extends StatelessWidget {
       lines: provider.lines,
       forecast: provider.forecastFor,
       history: (lineId, days) =>
-          provider.modelFor(lineId)?.recentActuals(days) ?? const [],
+      provider.modelFor(lineId)?.recentActuals(days) ?? const [],
       today: today,
     );
+
+    final linesWithData = outlook.lines
+        .where((line) => line.today.hasEnoughHistory)
+        .toList();
+
+    linesWithData.sort((a, b) => b.today.relativeToTypical.compareTo(a.today.relativeToTypical));
+
+    final linesWithoutData = outlook.lines
+        .where((line) => !line.today.hasEnoughHistory)
+        .toList();
+
+    final sortedLines = [...linesWithData, ...linesWithoutData];
 
     return RefreshIndicator(
       onRefresh: () => provider.load(forceRefresh: true),
@@ -62,12 +74,12 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   'Bars show predicted demand as a share of the highest recorded '
-                  'daily ridership for that line.',
+                      'daily ridership for that line.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
-                ...outlook.lines.map(
-                  (line) => Padding(
+                ...sortedLines.map(
+                      (line) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: _LineActivityCard(
                       line: provider.network.line(line.lineId),
@@ -214,20 +226,20 @@ class _TrendCard extends StatelessWidget {
 
     final entries = <BarChartEntry>[
       ...actuals.map((point) => BarChartEntry(
-            value: point.riders.toDouble(),
-            colour: DemandPalette.of(
-              ForecastProvider.bandForRelative(
-                busiest.today.baselineRiders <= 0
-                    ? 1
-                    : point.riders / busiest.today.baselineRiders,
-              ),
-            ),
-          )),
+        value: point.riders.toDouble(),
+        colour: DemandPalette.of(
+          ForecastProvider.bandForRelative(
+            busiest.today.baselineRiders <= 0
+                ? 1
+                : point.riders / busiest.today.baselineRiders,
+          ),
+        ),
+      )),
       ...predictions.map((forecast) => BarChartEntry(
-            value: forecast.predictedRiders.toDouble(),
-            colour: AppTheme.primary,
-            outlined: true,
-          )),
+        value: forecast.predictedRiders.toDouble(),
+        colour: AppTheme.primary,
+        outlined: true,
+      )),
     ];
 
     return SectionCard(
@@ -282,12 +294,13 @@ class _LineActivityCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ServiceDetailScreen(lineId: railLine.id),
-          ),
-        ),
+        onTap: () =>
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ServiceDetailScreen(lineId: railLine.id),
+              ),
+            ),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -299,7 +312,10 @@ class _LineActivityCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(railLine.shortName,
-                        style: Theme.of(context).textTheme.titleMedium),
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .titleMedium),
                   ),
                   const Icon(Icons.chevron_right,
                       size: 20, color: AppTheme.textSecondary),
@@ -309,20 +325,24 @@ class _LineActivityCard extends StatelessWidget {
               if (!forecast.hasEnoughHistory)
                 Text(
                   'Not enough history yet to forecast this line',
-                  style: AppTheme.mono(size: 11.5, color: DemandPalette.unknown),
+                  style: AppTheme.mono(
+                      size: 11.5, color: DemandPalette.unknown),
                 )
-              else ...[
-                DemandBar(
-                  value: forecast.percentOfMax,
-                  colour: colour,
-                  trailingLabel: '$percent%',
-                ),
-                const SizedBox(height: 9),
-                Text(
-                  'Predicted: ${DemandPalette.label(forecast.band).toLowerCase()}',
-                  style: AppTheme.mono(size: 11.5, color: colour),
-                ),
-              ],
+              else
+                ...[
+                  DemandBar(
+                    value: forecast.percentOfMax,
+                    colour: colour,
+                    trailingLabel: '$percent%',
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    'Predicted: ${DemandPalette
+                        .label(forecast.band)
+                        .toLowerCase()}',
+                    style: AppTheme.mono(size: 11.5, color: colour),
+                  ),
+                ],
             ],
           ),
         ),
