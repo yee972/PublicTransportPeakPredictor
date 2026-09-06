@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
+import '../../models/demand_forecast.dart';
 import '../../widgets/band_badge.dart';
 import '../../widgets/demand_bar.dart';
 import '../../widgets/section_card.dart';
@@ -61,29 +62,31 @@ class ServiceDetailScreen extends StatelessWidget {
             trailing: BandBadge(band: forecast.band),
             child: forecast.hasEnoughHistory
                 ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${Formatters.thousands(forecast.predictedRiders)} riders predicted',
-                        style: AppTheme.mono(size: 18, weight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 10),
-                      DemandBar(
-                        value: forecast.percentOfMax,
-                        colour: DemandPalette.of(forecast.band),
-                        trailingLabel:
-                            '${(forecast.percentOfMax * 100).round()}% max',
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        DemandPalette.label(forecast.band),
-                        style: AppTheme.mono(
-                          size: 12,
-                          color: DemandPalette.of(forecast.band),
-                        ),
-                      ),
-                    ],
-                  )
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${Formatters.thousands(forecast.predictedRiders)} riders predicted',
+                  style: AppTheme.mono(size: 18, weight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                _buildComparisonIndicator(forecast),
+                const SizedBox(height: 10),
+                DemandBar(
+                  value: forecast.percentOfMax,
+                  colour: DemandPalette.of(forecast.band),
+                  trailingLabel:
+                  '${(forecast.percentOfMax * 100).round()}% max',
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  DemandPalette.label(forecast.band),
+                  style: AppTheme.mono(
+                    size: 12,
+                    color: DemandPalette.of(forecast.band),
+                  ),
+                ),
+              ],
+            )
                 : const Text('Not enough ridership history to forecast this line yet.'),
           ),
           const SizedBox(height: 14),
@@ -93,9 +96,9 @@ class ServiceDetailScreen extends StatelessWidget {
             child: BarChart(
               entries: history
                   .map((point) => BarChartEntry(
-                        value: point.riders.toDouble(),
-                        colour: line.displayColour,
-                      ))
+                value: point.riders.toDouble(),
+                colour: line.displayColour,
+              ))
                   .toList(),
               axisLabels: const ['30 days ago', 'latest'],
             ),
@@ -107,25 +110,25 @@ class ServiceDetailScreen extends StatelessWidget {
             child: metrics == null || !metrics.isReliable
                 ? const Text('Not enough hold-out data to score this line yet.')
                 : Column(
-                    children: [
-                      _MetricRow(
-                        label: 'Mean absolute error',
-                        value: '${Formatters.thousands(metrics.meanAbsoluteError.round())} riders/day',
-                      ),
-                      _MetricRow(
-                        label: 'Mean absolute percentage error',
-                        value: '${metrics.meanAbsolutePercentageError.toStringAsFixed(1)}%',
-                      ),
-                      _MetricRow(
-                        label: 'Busy/quiet correct',
-                        value: '${metrics.classificationAccuracy.toStringAsFixed(1)}%',
-                      ),
-                      _MetricRow(
-                        label: 'Hold-out sample',
-                        value: '${metrics.sampleSize} days',
-                      ),
-                    ],
-                  ),
+              children: [
+                _MetricRow(
+                  label: 'Mean absolute error',
+                  value: '${Formatters.thousands(metrics.meanAbsoluteError.round())} riders/day',
+                ),
+                _MetricRow(
+                  label: 'Mean absolute percentage error',
+                  value: '${metrics.meanAbsolutePercentageError.toStringAsFixed(1)}%',
+                ),
+                _MetricRow(
+                  label: 'Busy/quiet correct',
+                  value: '${metrics.classificationAccuracy.toStringAsFixed(1)}%',
+                ),
+                _MetricRow(
+                  label: 'Hold-out sample',
+                  value: '${metrics.sampleSize} days',
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
           if (line.sharesSeries)
@@ -142,14 +145,14 @@ class ServiceDetailScreen extends StatelessWidget {
               runSpacing: 6,
               children: stations
                   .map((station) => Chip(
-                        label: Text(
-                          station.name,
-                          style: AppTheme.mono(size: 11),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        side: const BorderSide(color: AppTheme.outline),
-                        backgroundColor: Colors.white,
-                      ))
+                label: Text(
+                  station.name,
+                  style: AppTheme.mono(size: 11),
+                ),
+                visualDensity: VisualDensity.compact,
+                side: const BorderSide(color: AppTheme.outline),
+                backgroundColor: Colors.white,
+              ))
                   .toList(),
             ),
           ),
@@ -158,6 +161,38 @@ class ServiceDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildComparisonIndicator(DemandForecast forecast) {
+    final diffPercent = ((forecast.relativeToTypical - 1) * 100).round();
+
+    if (diffPercent.abs() <= 2) {
+      return Text(
+        '~ In line with a typical day',
+        style: AppTheme.mono(size: 12, color: AppTheme.textSecondary),
+      );
+    }
+
+    final isAbove = diffPercent > 0;
+    final color = isAbove ? DemandPalette.busy : DemandPalette.quiet;
+
+    return Row(
+      children: [
+        Icon(
+          isAbove ? Icons.trending_up : Icons.trending_down,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '${isAbove ? '+' : ''}$diffPercent% ${isAbove ? 'above' : 'below'} a typical day',
+          style: AppTheme.mono(
+            size: 12,
+            weight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _MetricRow extends StatelessWidget {
