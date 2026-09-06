@@ -15,7 +15,7 @@ class ValidationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ForecastProvider>();
-    final metrics = provider.allValidation;
+    final metrics = provider.distinctSeriesValidation;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Validation')),
