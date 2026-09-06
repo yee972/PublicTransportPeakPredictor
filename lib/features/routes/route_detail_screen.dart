@@ -6,7 +6,6 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/journey.dart';
 import '../../models/rail_network.dart';
-import '../../services/notification_service.dart';
 import '../../widgets/band_badge.dart';
 import '../../widgets/demand_bar.dart';
 import '../../widgets/section_card.dart';
@@ -116,55 +115,11 @@ class RouteDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          OutlinedButton.icon(
-            onPressed: () => _scheduleReminder(context, network),
-            icon: const Icon(Icons.notifications_active_outlined, size: 19),
-            label: const Text('Remind me before I leave'),
-          ),
         ],
       ),
     );
   }
 
-  Future<void> _scheduleReminder(
-    BuildContext context,
-    RailNetwork network,
-  ) async {
-    final service = context.read<NotificationService>();
-    final granted = await service.requestPermission();
-    final departAt = journey.departureTime.subtract(const Duration(minutes: 15));
-    final origin = network.stationName(journey.originStationId);
-    final destination = network.stationName(journey.destinationStationId);
-
-    if (departAt.isAfter(DateTime.now())) {
-      await service.scheduleDepartureReminder(
-        departAt: departAt,
-        title: 'Leave soon for $destination',
-        body: 'Your ${journey.preference.label.toLowerCase()} route from $origin '
-            'departs at ${Formatters.clock(journey.departureTime)}.',
-      );
-    } else {
-      await service.showNow(
-        title: 'Route to $destination',
-        body: '${JourneyFormatter.duration(journey.totalSeconds)} via '
-            '${journey.legs.map((leg) => network.lineName(leg.lineId)).join(' → ')}.',
-      );
-    }
-
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          granted
-              ? departAt.isAfter(DateTime.now())
-                  ? 'Reminder set for ${Formatters.clock(departAt)}'
-                  : 'Route sent to your notifications'
-              : 'Notifications are turned off for this app',
-        ),
-      ),
-    );
-  }
 }
 
 class _LegCard extends StatelessWidget {
@@ -242,6 +197,7 @@ class _LegCard extends StatelessWidget {
               value: JourneyFormatter.normalisedCrowd(leg.averageCrowdIndex),
               colour: colour,
               trailingLabel: JourneyFormatter.crowdLabel(leg.averageCrowdIndex),
+              labelColour: AppTheme.textSecondary,
             ),
           ],
         ),

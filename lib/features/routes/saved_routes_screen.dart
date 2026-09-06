@@ -62,11 +62,21 @@ class _SavedRoutesScreenState extends State<SavedRoutesScreen> {
       body: provider.loadingSaved
           ? const LoadingView(message: 'Loading your routes')
           : routes.isEmpty
-              ? const EmptyView(
-                  message: 'No saved routes yet.\nPlan a journey and tap the '
-                      'bookmark to keep it here.',
-                  icon: Icons.bookmark_border,
-                )
+              ? provider.savedMessage != null
+                  ? ErrorView(
+                      message: provider.savedMessage!,
+                      onRetry: () {
+                        final userId = context.read<AuthProvider>().userId;
+                        if (userId != null) {
+                          provider.loadSavedRoutes(userId);
+                        }
+                      },
+                    )
+                  : const EmptyView(
+                      message: 'No saved routes yet.\nPlan a journey and tap the '
+                          'bookmark to keep it here.',
+                      icon: Icons.bookmark_border,
+                    )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
                   itemCount: routes.length,

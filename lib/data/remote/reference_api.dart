@@ -23,19 +23,19 @@ class ReferenceApi {
 
   Future<List<RailLine>> fetchLines() async {
     return _guard('rail lines', () async {
-      final rows = await _client.from('rail_lines').select().order('sort_order');
+      final rows = await _client.from('rail_lines').select().order('sort_order', ascending: true);
       return rows.map<RailLine>((row) => RailLine.fromJson(row)).toList();
     });
   }
 
   Future<List<Station>> fetchStations() async {
     return _guard('stations', () async {
-      final stationRows = await _client.from('stations').select().order('name');
+      final stationRows = await _client.from('stations').select().order('name', ascending: true);
       final lineRows = await _client
           .from('station_lines')
           .select()
-          .order('line_id')
-          .order('stop_sequence');
+          .order('line_id', ascending: true)
+          .order('stop_sequence', ascending: true);
 
       final linesByStation = <String, List<String>>{};
       for (final row in lineRows) {
@@ -55,8 +55,8 @@ class ReferenceApi {
       final rows = await _client
           .from('station_lines')
           .select()
-          .order('line_id')
-          .order('stop_sequence');
+          .order('line_id', ascending: true)
+          .order('stop_sequence', ascending: true);
       return rows.map<StationLine>((row) => StationLine.fromJson(row)).toList();
     });
   }
@@ -80,8 +80,8 @@ class ReferenceApi {
       final rows = await _client
           .from('schedule_frequency')
           .select()
-          .order('line_id')
-          .order('hour_of_day');
+          .order('line_id', ascending: true)
+          .order('hour_of_day', ascending: true);
       return rows.map<ScheduleSlot>((row) => ScheduleSlot.fromJson(row)).toList();
     });
   }

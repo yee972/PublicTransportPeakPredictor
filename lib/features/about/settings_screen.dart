@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
-import '../../services/notification_service.dart';
 import '../../widgets/section_card.dart';
 import '../auth/auth_provider.dart';
 import '../forecast/forecast_provider.dart';
@@ -79,40 +78,6 @@ class SettingsScreen extends StatelessWidget {
                       label: const Text('Change'),
                     ),
                   ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          SectionCard(
-            title: 'Peak alerts',
-            icon: Icons.notifications_outlined,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: profile?.peakAlertsEnabled ?? true,
-                  title: const Text('Daily morning forecast'),
-                  subtitle: const Text('A 07:00 notification when a busy day is predicted'),
-                  onChanged: (enabled) async {
-                    final service = context.read<NotificationService>();
-                    final provider = context.read<AuthProvider>();
-                    if (enabled) {
-                      final granted = await service.requestPermission();
-                      if (granted) {
-                        await service.scheduleDailyPeakAlert(
-                          hour: 7,
-                          minute: 0,
-                          title: 'Peak Predictor',
-                          body: 'Check today\'s rail demand forecast before you travel.',
-                        );
-                      }
-                    } else {
-                      await service.cancelPeakAlert();
-                    }
-                    await provider.updateProfile(peakAlertsEnabled: enabled);
-                  },
                 ),
               ],
             ),

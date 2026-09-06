@@ -130,6 +130,16 @@ class _RoutePlannerScreenState extends State<RoutePlannerScreen> {
       );
     }
 
+    final locationMessage = provider.locationMessage;
+    if (locationMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(locationMessage)));
+        provider.clearLocationMessage();
+      });
+    }
+
     final planner = provider.planner;
 
     return ListView(

@@ -17,7 +17,6 @@ import 'features/busytimes/busy_times_provider.dart';
 import 'features/forecast/forecast_provider.dart';
 import 'features/routes/route_planner_provider.dart';
 import 'services/location_service.dart';
-import 'services/notification_service.dart';
 
 class PeakPredictorApp extends StatelessWidget {
   const PeakPredictorApp({super.key});
@@ -36,7 +35,6 @@ class PeakPredictorApp extends StatelessWidget {
       providers: [
         Provider<PreferencesService>.value(value: preferences),
         Provider<LocationService>(create: (_) => LocationService()),
-        Provider<NotificationService>(create: (_) => NotificationService()),
         Provider<AccountRepository>.value(value: accountRepository),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(client, accountRepository),

@@ -30,6 +30,9 @@ class Formatters {
   static String dayMonth(DateTime date) =>
       '${date.day} ${_months[date.month - 1]}';
 
+  static String dayMonthYear(DateTime date) =>
+      '${date.day} ${_months[date.month - 1]} ${date.year}';
+
   static String fullDate(DateTime date) =>
       '${weekdayLong(date)}, ${date.day} ${_months[date.month - 1]} ${date.year}';
 

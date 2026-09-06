@@ -40,7 +40,12 @@ class ForecastProvider extends ChangeNotifier {
 
   List<RailLine> get lines => _network.lines;
 
-  DateTime get referenceDate {
+  DateTime get today {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  DateTime get latestDataDate {
     DateTime? latest;
     for (final model in _models.values) {
       final date = model.latestDate;
@@ -149,7 +154,7 @@ class ForecastProvider extends ChangeNotifier {
 
   List<DemandForecast> sevenDayFor(String lineId, {DateTime? from}) {
     final model = _models[lineId];
-    final start = from ?? referenceDate.add(const Duration(days: 1));
+    final start = from ?? today.add(const Duration(days: 1));
     if (model == null) {
       return List.generate(
         AppConfig.forecastHorizonDays,
@@ -163,7 +168,7 @@ class ForecastProvider extends ChangeNotifier {
   }
 
   List<DemandForecast> networkSevenDay({DateTime? from}) {
-    final start = from ?? referenceDate.add(const Duration(days: 1));
+    final start = from ?? today.add(const Duration(days: 1));
     return List.generate(AppConfig.forecastHorizonDays, (index) {
       final date = start.add(Duration(days: index));
       return _blendAcrossLines(date);

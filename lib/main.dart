@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/app_config.dart';
-import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +17,6 @@ Future<void> main() async {
     publishableKey: AppConfig.supabaseAnonKey,
   );
 
-  await NotificationService().initialize();
 
   runApp(const PeakPredictorApp());
 }
@@ -45,7 +43,7 @@ class SetupRequiredApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Open src/core/app_config.dart and paste your Supabase project '
+                  'Open lib/core/app_config.dart and paste your Supabase project '
                   'URL and anon key, then restart the app.',
                   textAlign: TextAlign.center,
                 ),

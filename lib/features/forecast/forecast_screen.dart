@@ -20,6 +20,13 @@ class ForecastScreen extends StatefulWidget {
 }
 
 class _ForecastScreenState extends State<ForecastScreen> {
+  bool _isTomorrow(DateTime date) {
+    final target = DateTime.now().add(const Duration(days: 1));
+    return date.year == target.year &&
+        date.month == target.month &&
+        date.day == target.day;
+  }
+
   String _selectedLineId = 'network';
 
   @override
@@ -51,6 +58,13 @@ class _ForecastScreenState extends State<ForecastScreen> {
           label: '7-Day Forecast',
           caption: 'Predicted demand from historical daily ridership on data.gov.my.',
         ),
+        const SizedBox(height: 12),
+        InfoNote(
+          message: 'Predictions for the next 7 days, modelled from ridership '
+              'published on data.gov.my up to '
+              '${Formatters.dayMonthYear(provider.latestDataDate)}.',
+          icon: Icons.event_note_outlined,
+        ),
         const SizedBox(height: 14),
         _LineSelector(
           value: _selectedLineId,
@@ -72,7 +86,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
             padding: const EdgeInsets.only(bottom: 10),
             child: _DayCard(
               forecast: entry.value,
-              isTomorrow: entry.key == 0,
+              isTomorrow: _isTomorrow(entry.value.date),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -249,7 +263,10 @@ class _DayCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isTomorrow ? 'Tomorrow' : Formatters.weekdayLong(forecast.date),
+                      isTomorrow
+                          ? 'Tomorrow'
+                          : '${Formatters.weekdayLong(forecast.date)}, '
+                              '${Formatters.dayMonth(forecast.date)}',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 3),

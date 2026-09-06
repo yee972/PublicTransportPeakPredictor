@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_config.dart';
+
 import '../../models/journey.dart';
 import '../../models/user_profile.dart';
 import 'reference_api.dart';
@@ -15,7 +17,8 @@ class AccountApi {
           .from('profiles')
           .select()
           .eq('id', userId)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(AppConfig.requestTimeout);
       if (row == null) return null;
       return UserProfile.fromJson(row);
     } on PostgrestException catch (error) {
@@ -31,7 +34,8 @@ class AccountApi {
           .from('profiles')
           .upsert(profile.toJson())
           .select()
-          .single();
+          .single()
+          .timeout(AppConfig.requestTimeout);
       return UserProfile.fromJson(row);
     } on PostgrestException catch (error) {
       throw DataFailure('Could not save your profile: ${error.message}');
@@ -46,7 +50,8 @@ class AccountApi {
           .from('saved_routes')
           .select()
           .eq('user_id', userId)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .timeout(AppConfig.requestTimeout);
       return rows.map<SavedRoute>((row) => SavedRoute.fromJson(row)).toList();
     } on PostgrestException catch (error) {
       throw DataFailure('Could not load saved routes: ${error.message}');
@@ -73,7 +78,8 @@ class AccountApi {
             'preference': preference.storageValue,
           })
           .select()
-          .single();
+          .single()
+          .timeout(AppConfig.requestTimeout);
       return SavedRoute.fromJson(row);
     } on PostgrestException catch (error) {
       if (error.code == '23505') {
@@ -87,7 +93,11 @@ class AccountApi {
 
   Future<void> deleteSavedRoute(String routeId) async {
     try {
-      await _client.from('saved_routes').delete().eq('id', routeId);
+      await _client
+          .from('saved_routes')
+          .delete()
+          .eq('id', routeId)
+          .timeout(AppConfig.requestTimeout);
     } on PostgrestException catch (error) {
       throw DataFailure('Could not delete this route: ${error.message}');
     } catch (_) {

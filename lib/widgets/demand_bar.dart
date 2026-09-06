@@ -6,6 +6,7 @@ class DemandBar extends StatelessWidget {
   final double value;
   final Color colour;
   final String? trailingLabel;
+  final Color? labelColour;
   final double height;
 
   const DemandBar({
@@ -13,6 +14,7 @@ class DemandBar extends StatelessWidget {
     required this.value,
     required this.colour,
     this.trailingLabel,
+    this.labelColour,
     this.height = 7,
   });
 
@@ -36,7 +38,10 @@ class DemandBar extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             trailingLabel!,
-            style: AppTheme.mono(size: 11, color: colour, weight: FontWeight.w700),
+            style: AppTheme.mono(
+                size: 11,
+                color: labelColour ?? colour,
+                weight: FontWeight.w700),
           ),
         ],
       ],

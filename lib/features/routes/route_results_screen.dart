@@ -85,80 +85,14 @@ class RouteResultsScreen extends StatelessWidget {
     final userId = auth.userId;
     if (userId == null) return;
 
-    final formKey = GlobalKey<FormState>();
-    final controller = TextEditingController(
-      text: '${provider.network.stationName(provider.originId ?? '')} to '
-          '${provider.network.stationName(provider.destinationId ?? '')}',
-    );
-    var preference = provider.results.first.preference;
-
     final saved = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            return AlertDialog(
-              title: const Text('Save route'),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: controller,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        hintText: 'Morning commute',
-                      ),
-                      validator: Validators.routeLabel,
-                    ),
-                    const SizedBox(height: 14),
-                    DropdownButtonFormField<JourneyPreference>(
-                      initialValue: preference,
-                      decoration: const InputDecoration(labelText: 'Preference'),
-                      items: JourneyPreference.values
-                          .map((item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(item.label),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setDialogState(() => preference = value);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () async {
-                    if (!formKey.currentState!.validate()) return;
-                    final success = await provider.saveCurrentRoute(
-                      userId: userId,
-                      label: controller.text.trim(),
-                      preference: preference,
-                    );
-                    if (dialogContext.mounted) {
-                      Navigator.pop(dialogContext, success);
-                    }
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (dialogContext) => _SaveRouteDialog(
+        provider: provider,
+        userId: userId,
+      ),
     );
 
-    controller.dispose();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -168,6 +102,98 @@ class RouteResultsScreen extends StatelessWidget {
               : provider.savedMessage ?? 'Route was not saved',
         ),
       ),
+    );
+  }
+}
+
+class _SaveRouteDialog extends StatefulWidget {
+  final RoutePlannerProvider provider;
+  final String userId;
+
+  const _SaveRouteDialog({required this.provider, required this.userId});
+
+  @override
+  State<_SaveRouteDialog> createState() => _SaveRouteDialogState();
+}
+
+class _SaveRouteDialogState extends State<_SaveRouteDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _controller;
+  late JourneyPreference _preference;
+
+  @override
+  void initState() {
+    super.initState();
+    final network = widget.provider.network;
+    _controller = TextEditingController(
+      text: '${network.stationName(widget.provider.originId ?? '')} to '
+          '${network.stationName(widget.provider.destinationId ?? '')}',
+    );
+    _preference = widget.provider.results.first.preference;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Save route'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                hintText: 'Morning commute',
+              ),
+              validator: Validators.routeLabel,
+            ),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<JourneyPreference>(
+              initialValue: _preference,
+              decoration: const InputDecoration(labelText: 'Preference'),
+              items: JourneyPreference.values
+                  .map((item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(item.label),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _preference = value);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () async {
+            if (!_formKey.currentState!.validate()) return;
+            final success = await widget.provider.saveCurrentRoute(
+              userId: widget.userId,
+              label: _controller.text.trim(),
+              preference: _preference,
+            );
+            if (!context.mounted) return;
+            Navigator.pop(context, success);
+          },
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }

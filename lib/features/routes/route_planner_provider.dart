@@ -217,6 +217,12 @@ class RoutePlannerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearLocationMessage() {
+    if (_locationMessage == null) return;
+    _locationMessage = null;
+    notifyListeners();
+  }
+
   void clearMessages() {
     _planMessage = null;
     _savedMessage = null;

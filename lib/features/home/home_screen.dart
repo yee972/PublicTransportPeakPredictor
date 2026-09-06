@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../algorithms/outlook_synthesis.dart';
 import '../../core/app_theme.dart';
+import '../../core/formatters.dart';
 import '../../models/demand_band.dart';
 import '../../models/demand_forecast.dart';
 import '../../models/rail_line.dart';
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
-    final today = provider.referenceDate;
+    final today = provider.today;
     final outlook = OutlookSynthesis.build(
       lines: provider.lines,
       forecast: provider.forecastFor,
@@ -43,7 +44,8 @@ class HomeScreen extends StatelessWidget {
         .where((line) => line.today.hasEnoughHistory)
         .toList();
 
-    linesWithData.sort((a, b) => b.today.relativeToTypical.compareTo(a.today.relativeToTypical));
+    linesWithData.sort(
+        (a, b) => b.today.percentOfMax.compareTo(a.today.percentOfMax));
 
     final linesWithoutData = outlook.lines
         .where((line) => !line.today.hasEnoughHistory)
@@ -60,12 +62,19 @@ class HomeScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
               children: [
-                _OutlookHeader(outlook: outlook, referenceDate: today),
+                _OutlookHeader(outlook: outlook, dataThrough: provider.latestDataDate),
                 const SizedBox(height: 14),
                 _StatusCard(outlook: outlook),
+        const SizedBox(height: 12),
+        InfoNote(
+          message: 'Forecasts for today and the week ahead are modelled from '
+              'ridership published on data.gov.my up to '
+              '${Formatters.dayMonthYear(provider.latestDataDate)}.',
+          icon: Icons.event_note_outlined,
+        ),
                 const SizedBox(height: 22),
                 Text(
-                  '30-Day Daily Ridership Trend',
+                  '20-Day Daily Ridership Trend',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -99,9 +108,9 @@ class HomeScreen extends StatelessWidget {
 
 class _OutlookHeader extends StatelessWidget {
   final NetworkOutlook outlook;
-  final DateTime referenceDate;
+  final DateTime dataThrough;
 
-  const _OutlookHeader({required this.outlook, required this.referenceDate});
+  const _OutlookHeader({required this.outlook, required this.dataThrough});
 
   @override
   Widget build(BuildContext context) {
@@ -225,14 +234,14 @@ class _TrendCard extends StatelessWidget {
         : busiest.recentTrend;
     final predictions = provider.sevenDayFor(busiest.lineId);
 
+    final typical = provider.modelFor(busiest.lineId)?.typicalRiders ?? 0;
+
     final entries = <BarChartEntry>[
       ...actuals.map((point) => BarChartEntry(
         value: point.riders.toDouble(),
         colour: DemandPalette.of(
           DemandBands.fromRelative(
-            busiest.today.baselineRiders <= 0
-                ? 1
-                : point.riders / busiest.today.baselineRiders,
+            typical <= 0 ? 1 : point.riders / typical,
           ),
         ),
       )),
@@ -270,7 +279,7 @@ class _TrendCard extends StatelessWidget {
           const SizedBox(height: 14),
           BarChart(
             entries: entries,
-            axisLabels: const ['20 days ago', 'today', '+7 days'],
+            axisLabels: const ['20 days ago', 'latest data', 'next 7 days'],
           ),
         ],
       ),

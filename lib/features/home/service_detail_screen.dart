@@ -28,7 +28,7 @@ class ServiceDetailScreen extends StatelessWidget {
       );
     }
 
-    final today = provider.referenceDate;
+    final today = provider.today;
     final forecast = provider.forecastFor(lineId, today);
     final metrics = provider.validationFor(lineId);
     final history = model.recentActuals(30);
